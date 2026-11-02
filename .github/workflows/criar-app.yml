@@ -1,0 +1,81 @@
+name: Criar aplicativo
+
+on:
+  workflow_dispatch:
+    inputs:
+      nome:
+        description: "Nome do aplicativo (ex: Minha Loja)"
+        required: true
+        type: string
+      site:
+        description: "Endereço do site (ex: https://shopee.com.br)"
+        required: true
+        type: string
+      icone:
+        description: "Link de uma imagem para o ícone (opcional - deixe vazio para usar o ícone do site)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  montar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pegar os arquivos do projeto
+        uses: actions/checkout@v4
+
+      - name: Instalar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Instalar ferramentas do Android
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Colocar nome, site e ícone no app
+        id: config
+        env:
+          NOME: ${{ inputs.nome }}
+          SITE: ${{ inputs.site }}
+          ICONE: ${{ inputs.icone }}
+        run: |
+          pip install pillow
+          python ferramentas/configurar.py
+
+      - name: Montar o aplicativo
+        env:
+          VERSAO: ${{ github.run_number }}
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      - name: Publicar o APK para baixar
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NOME: ${{ inputs.nome }}
+          SITE: ${{ inputs.site }}
+          SLUG: ${{ steps.config.outputs.slug }}
+          VERSAO: ${{ github.run_number }}
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk "$SLUG.apk"
+          gh release create "$SLUG-v$VERSAO" "$SLUG.apk" \
+            --title "$NOME (versão $VERSAO)" \
+            --notes "Aplicativo do site: $SITE"
+
+      - name: Guardar uma cópia do APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.config.outputs.slug }}
+          path: ${{ steps.config.outputs.slug }}.apk
