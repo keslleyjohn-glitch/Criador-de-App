@@ -171,6 +171,22 @@ def main():
     )
     (RAIZ / "config.properties").write_text(f"pacote={pacote}\n", encoding="utf-8")
 
+    # Pagina que aparece quando nao tem internet
+    assets = RAIZ / "app" / "src" / "main" / "assets"
+    assets.mkdir(parents=True, exist_ok=True)
+    link = site.replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;")
+    (assets / "erro.html").write_text(
+        "<!doctype html><html><head><meta charset='utf-8'>"
+        "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+        "<style>body{background:#111;color:#eee;font-family:sans-serif;display:flex;"
+        "flex-direction:column;align-items:center;justify-content:center;height:90vh;"
+        "text-align:center;margin:0}a{margin-top:24px;padding:16px 32px;background:#2a7de1;"
+        "color:#fff;border-radius:10px;text-decoration:none;font-size:20px}</style></head><body>"
+        "<h2>Sem conexão com a internet</h2><p>Verifique o Wi-Fi e tente de novo.</p>"
+        f"<a href=\"{link}\">Tentar de novo</a></body></html>",
+        encoding="utf-8",
+    )
+
     imagem = achar_icone(site, icone)
     print("Icone:", "imagem do site/link" if imagem else "primeira letra do nome")
     for pasta, lado in (("mdpi", 48), ("hdpi", 72), ("xhdpi", 96), ("xxhdpi", 144), ("xxxhdpi", 192)):
