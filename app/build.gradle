@@ -21,10 +21,6 @@ android {
         targetSdk 35
         versionCode versao
         versionName "1.${versao}"
-        // Aparelhos 32 bits (TV box) e 64 bits (celular)
-        ndk {
-            abiFilters 'armeabi-v7a', 'arm64-v8a'
-        }
     }
 
     signingConfigs {
@@ -43,12 +39,6 @@ android {
         }
     }
 
-    packagingOptions {
-        jniLibs {
-            useLegacyPackaging true
-        }
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
@@ -61,6 +51,11 @@ android {
 }
 
 dependencies {
-    // Motor do Firefox (vem dentro do app)
-    implementation 'org.mozilla.geckoview:geckoview:135.+'
+    // Player proprio de video (o mesmo usado por muitos apps de TV)
+    implementation 'androidx.media3:media3-exoplayer:1.4.1'
+    implementation 'androidx.media3:media3-exoplayer-hls:1.4.1'
+    implementation 'androidx.media3:media3-exoplayer-dash:1.4.1'
+    implementation 'androidx.media3:media3-ui:1.4.1'
+    // Recursos extras do WebView (achar o video dentro do site)
+    implementation 'androidx.webkit:webkit:1.11.0'
 }
