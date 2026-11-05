@@ -333,6 +333,11 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent e) {
+        // Tecla Esc (o "voltar" de alguns teclados) funciona como Voltar
+        if (e.getKeyCode() == KeyEvent.KEYCODE_ESCAPE) {
+            if (e.getAction() == KeyEvent.ACTION_UP) onBackPressed();
+            return true;
+        }
         if (telaCheia == null) {
             int k = e.getKeyCode();
             boolean seta = k == KeyEvent.KEYCODE_DPAD_UP || k == KeyEvent.KEYCODE_DPAD_DOWN
@@ -592,12 +597,15 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
         web.onPause();
+        // Para o site de trabalhar escondido (deixa o processador para o player)
+        web.pauseTimers();
         CookieManager.getInstance().flush();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        web.resumeTimers();
         web.onResume();
         esconderBarras();
     }

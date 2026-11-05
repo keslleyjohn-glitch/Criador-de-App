@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -12,8 +13,10 @@ import androidx.media3.common.MimeTypes;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.ui.PlayerView;
 
 import java.util.HashMap;
@@ -75,8 +78,15 @@ public class PlayerActivity extends Activity {
         DefaultMediaSourceFactory fontes = new DefaultMediaSourceFactory(this)
                 .setDataSourceFactory(internet);
 
-        player = new ExoPlayer.Builder(this)
+        // Aparelho fraco: no maximo 720p, e se um decodificador falhar tenta outro
+        DefaultTrackSelector seletor = new DefaultTrackSelector(this);
+        seletor.setParameters(seletor.buildUponParameters().setMaxVideoSize(1280, 720).build());
+        DefaultRenderersFactory decodificadores = new DefaultRenderersFactory(this)
+                .setEnableDecoderFallback(true);
+
+        player = new ExoPlayer.Builder(this, decodificadores)
                 .setMediaSourceFactory(fontes)
+                .setTrackSelector(seletor)
                 .build();
 
         MediaItem.Builder item = new MediaItem.Builder().setUri(url);
@@ -117,6 +127,16 @@ public class PlayerActivity extends Activity {
         player.prepare();
         tela.requestFocus();
         esconderBarras();
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent e) {
+        // Tecla Esc (o "voltar" de alguns teclados) fecha o player
+        if (e.getKeyCode() == KeyEvent.KEYCODE_ESCAPE) {
+            if (e.getAction() == KeyEvent.ACTION_UP) finish();
+            return true;
+        }
+        return super.dispatchKeyEvent(e);
     }
 
     @SuppressWarnings("deprecation")
