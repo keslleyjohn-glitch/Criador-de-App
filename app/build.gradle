@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId cfg.getProperty('pacote', 'app.site.meuaplicativo')
-        minSdk 26
+        minSdk 21
         targetSdk 35
         versionCode versao
         versionName "1.${versao}"
